@@ -1,0 +1,46 @@
+model User {
+  userId    Int     @id @default(autoincrement())
+  name      String
+  role      String
+  status    String
+}
+
+model ServiceRequest {
+  requestId Int     @id @default(autoincrement())
+  userId    Int
+  type      String
+  status    String
+  documents String[]
+}
+
+model Queue {
+  id        Int     @id @default(autoincrement())
+  requestId Int
+  priority  Int
+}
+
+model PublicEvent {
+  eventId   Int     @id @default(autoincrement())
+  title     String
+  date      DateTime
+  location  String
+}
+
+model Notification {
+  notificationId Int     @id @default(autoincrement())
+  message        String
+  channel        String
+}
+
+model Document {
+  documentId Int     @id @default(autoincrement())
+  type       String
+  status     String
+}
+
+model Support {
+  id          Int     @id @default(autoincrement())
+  question    String
+  answer      String
+  createdAt   DateTime @default(now())
+}
