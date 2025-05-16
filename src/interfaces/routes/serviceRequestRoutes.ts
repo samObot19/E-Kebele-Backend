@@ -1,28 +1,33 @@
-import { Router } from 'express';
-import { ServiceRequestController } from '../controllers/ServiceRequestController';
-import { ServiceRequestUseCase } from '../../application/use-cases/service-request';
-import { ServiceRequestRepository } from '../../infrastructure/repositories/ServiceRequestRepository';
+import express from "express";
+import { ServiceRequestController } from "../controllers/ServiceRequestController";
+import { authenticate } from "../middlewares/authenticate"; // Middleware to check authentication
 
-const router = Router();
+const router = express.Router();
+const serviceRequestController = new ServiceRequestController();
 
-// Dependency injection
-const serviceRequestRepository = new ServiceRequestRepository();
-const serviceRequestUseCase = new ServiceRequestUseCase(serviceRequestRepository);
-const serviceRequestController = new ServiceRequestController(serviceRequestUseCase);
+// Route to submit a service request
+router.post(
+  "/service-requests",
+  authenticate, // Ensure the user is authenticated and is a "Resident"
+  (req, res) => serviceRequestController.createServiceRequest(req, res)
+);
 
-// Route to create a new service request
-router.post('/', (req, res) => serviceRequestController.createServiceRequest(req, res));
+router.get(
+  "/",
+  authenticate,
+  (req, res) => serviceRequestController.getAllServiceRequests(req, res)
+);
 
-// Route to get all service requests
-router.get('/', (req, res) => serviceRequestController.getAllServiceRequests(req, res));
+router.get(
+  "/service-requests/:requestId",
+  authenticate,
+  (req, res) => serviceRequestController.getServiceRequestById(req, res)
+);
 
-// Route to get a specific service request by ID
-router.get('/:id', (req, res) => serviceRequestController.getServiceRequestById(req, res));
 
-// Route to update a service request by ID
-router.put('/:id', (req, res) => serviceRequestController.updateServiceRequest(req, res));
-
-// Route to delete a service request by ID
-router.delete('/:id', (req, res) => serviceRequestController.deleteServiceRequest(req, res));
-
+router.put(
+  "/service-requests/:requestId",
+  authenticate,
+  (req, res) => serviceRequestController.updateServiceRequest(req, res)
+);
 export default router;

@@ -1,46 +1,105 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Enum to enforce valid status values for various models
+enum UserRole {
+  ADMIN
+  USER
+  MODERATOR
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+// User model
 model User {
-  userId    Int     @id @default(autoincrement())
-  name      String
-  role      String
-  status    String
+  _id      String           @id @default(auto()) @map("_id")  // Use MongoDB _id
+  name     String
+  role     UserRole         // Enforced role enum for consistency
+  status   String
+  requests ServiceRequest[] // One-to-many relation with ServiceRequest
 }
 
+// ServiceRequest model
 model ServiceRequest {
-  requestId Int     @id @default(autoincrement())
-  userId    Int
+  _id       String           @id @default(auto()) @map("_id") // MongoDB auto-generated _id
+  userId    String           // Foreign key referencing User
   type      String
-  status    String
-  documents String[]
+  status    RequestStatus    // Enforced status enum for consistency
+  documents String[]         // Array of document types
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user      User             @relation(fields: [userId], references: [_id]) // MongoDB relation
+  queues    Queue[]          // One-to-many relation with Queue
 }
 
+// Queue model
 model Queue {
-  id        Int     @id @default(autoincrement())
-  requestId Int
-  priority  Int
+  _id       String           @id @default(auto()) @map("_id")  // MongoDB auto-generated _id
+  requestId String           // Foreign key referencing ServiceRequest
+  priority  Int              // Priority level of the request
+  request   ServiceRequest   @relation(fields: [requestId], references: [_id]) // MongoDB relation with ServiceRequest
 }
 
+// PublicEvent model
 model PublicEvent {
-  eventId   Int     @id @default(autoincrement())
+  _id       String           @id @default(auto()) @map("_id")  // MongoDB auto-generated _id
   title     String
   date      DateTime
   location  String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
+// Notification model
 model Notification {
-  notificationId Int     @id @default(autoincrement())
-  message        String
-  channel        String
+  _id         String            @id @default(auto()) @map("_id")  // MongoDB auto-generated _id
+  message     String
+  channel     NotificationChannel  // Enforced channel enum for consistency
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
+// Document model
 model Document {
-  documentId Int     @id @default(autoincrement())
+  _id        String           @id @default(auto()) @map("_id") // MongoDB auto-generated _id
   type       String
-  status     String
+  status     DocumentStatus   // Enforced status enum for consistency
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 }
 
+// Support model
 model Support {
-  id          Int     @id @default(autoincrement())
-  question    String
-  answer      String
-  createdAt   DateTime @default(now())
+  _id        String           @id @default(auto()) @map("_id")  // MongoDB auto-generated _id
+  question   String
+  answer     String
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 }

@@ -1,31 +1,52 @@
+// src/routes/userRoutes.ts
 import { Router } from 'express';
 import { UserController } from '../controllers/UserController';
-import { UserUseCase } from '../../application/use-cases/user';
-import { UserRepository } from '../../infrastructure/repositories/UserRepository';
+import { authenticate } from '../middlewares/authenticate';
 
 const router = Router();
 
-// Dependency injection
-const userRepository = new UserRepository();
-const userUseCase = new UserUseCase(userRepository);
-const userController = new UserController(userUseCase);
 
-// User registration
+const userController = new UserController();
+
+// User registration route
 router.post('/register', (req, res) => userController.registerUser(req, res));
 
-// User login
-router.post('/login', (req, res) => userController.authenticateUser(req, res));
+// User login route
+router.post('/login', (req, res) => userController.loginUser(req, res));
 
-// Get user details
-router.get('/:userId', (req, res) => userController.getUserById(req, res));
+// Google login/register
+router.post('/google', (req, res) => userController.googleAuth(req, res));
 
-// Update user details
-router.put('/:userId', (req, res) => userController.updateUser(req, res));
 
-// Delete user
-router.delete('/:userId', (req, res) => userController.deleteUser(req, res));
 
-// List all users
-router.get('/', (req, res) => userController.listUsers(req, res));
+// User logout route
+router.post('/logout', (req, res) => userController.logoutUser(req, res));
+
+// GET /api/users/:userId - Get a user by ID
+router.get("/:userId", authenticate, (req, res) =>
+  userController.getUserById(req, res)
+);
+
+router.put(
+  "/:userId/verify",
+  authenticate, // must attach req.user
+  (req, res) => userController.verifyUser(req, res)
+);
+
+
+
+// Route for approving or rejecting user access
+router.put(
+  "/:userId/approve",
+  authenticate, // Middleware to verify JWT and attach user info
+  (req, res) => userController.approveUser(req, res))
+
+
+// router.get(
+//   "/",
+//   authenticate,
+//   (req, res) => userController.getAllUsers(req, res))
+
+
 
 export default router;

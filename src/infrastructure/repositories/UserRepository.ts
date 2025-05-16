@@ -31,12 +31,16 @@ export class UserRepository implements IUserRepository {
     const userIndex = this.users.findIndex(user => user.userId === userId);
     if (userIndex !== -1) {
       this.users.splice(userIndex, 1);
-      return true; // Return true if the user was successfully deleted
+      return true; 
     }
-    return false; // Return false if the user was not found
-  }
+    return false; 
 
+
+    
   async listUsers(): Promise<User[]> {
     return this.users; // Return all users
   }
 }
+  }
+
+
