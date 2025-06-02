@@ -28,4 +28,9 @@ export class DocumentUseCase {
   public async deleteDocument(documentId: string): Promise<boolean> {
     return this.documentRepository.delete(documentId);
   }
+
+  // Get all documents by user ID
+  public async getDocumentsByUserId(userId: string): Promise<Document[]> {
+    return this.documentRepository.findByUserId(userId);
+  }
 }

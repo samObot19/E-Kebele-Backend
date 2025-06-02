@@ -1,14 +1,30 @@
+export type UserRole = 'resident' | 'goxe_admin' | 'kebele_admin';
+export type UserStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+
 export interface User {
   userId: string;
   name: string;
   email: string;
-  password: string;
-  phoneNumber: string;
+  password?: string;
+  googleId?: string;
+  role: UserRole;
+  status: UserStatus;
+  phone: string;
   address: string;
-  dateOfBirth: Date;
-  profilePicture: string;
-  createdAt: Date;
-  updatedAt: Date;
-  role: string;
-  status: 'active' | 'inactive' | 'suspended';
+  idNumber?: string;
+  adminCredentials?: {
+    username: string;
+    verificationCode: string;
+  };
+  verifiedBy?: {
+    goxeAdmin?: string;
+    kebeleAdmin?: string;
+  };
+  documents?: {
+    idPhoto?: string;
+    supportingDocs?: string[];
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any; // Add index signature for dynamic access
 }

@@ -6,4 +6,5 @@ export interface IDocumentRepository {
     update(documentId: string, document: Partial<Document>): Promise<Document | null>;
     delete(documentId: string): Promise<boolean>;
     findAll(): Promise<Document[]>;
+    findByUserId(userId: string): Promise<Document[]>;
 }

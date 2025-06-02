@@ -1,26 +1,53 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import passport from './config/passport';
+import { config } from './config/env';
+
+// Import routes
+import authRoutes from './interfaces/routes/authRoutes';
 import userRoutes from './interfaces/routes/userRoutes';
-import serviceRequestRoutes from './interfaces/routes/serviceRequestRoutes';
-import queueRoutes from './interfaces/routes/queueRoutes';
-import publicEventRoutes from './interfaces/routes/publicEventRoutes';
-import notificationRoutes from './interfaces/routes/notificationRoutes';
 import documentRoutes from './interfaces/routes/documentRoutes';
-import supportRoutes from './interfaces/routes/supportRoutes';
-import { json } from 'body-parser';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(json());
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
+// CORS configuration
+app.use(cors({
+  origin: [config.frontendURL, 'https://accounts.google.com'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true
+}));
+
+// Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/service-requests', serviceRequestRoutes);
-app.use('/api/queues', queueRoutes);
-app.use('/api/public-events', publicEventRoutes);
-app.use('/api/notifications', notificationRoutes);
 app.use('/api/documents', documentRoutes);
-app.use('/api/support', supportRoutes);
 
+// Health check endpoint
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Start server
+const PORT = config.port;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Frontend URL: ${config.frontendURL}`);
+  console.log(`Google callback URL: ${config.googleAuth.callbackURL}`);
 });

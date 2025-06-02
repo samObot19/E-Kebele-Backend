@@ -30,4 +30,8 @@ export class DocumentRepository implements IDocumentRepository {
   async findAll(): Promise<Document[]> {
     return this.documents;
   }
+
+  async findByUserId(userId: string): Promise<Document[]> {
+    return this.documents.filter(doc => doc.userId === userId);
+  }
 }

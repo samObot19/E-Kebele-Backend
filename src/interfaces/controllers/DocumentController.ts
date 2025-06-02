@@ -17,15 +17,34 @@ export class DocumentController {
 
   public async getDocument(req: Request, res: Response): Promise<void> {
     try {
-      const documentId = req.params.id;
-      const document = await this.documentUseCase.getDocumentById(documentId);
-      if (!document) {
-        res.status(404).json({ message: 'Document not found' });
-        return;
+      if (req.params.id) {
+        const documentId = req.params.id;
+        const document = await this.documentUseCase.getDocumentById(documentId);
+        if (!document) {
+          res.status(404).json({ message: 'Document not found' });
+          return;
+        }
+        res.status(200).json(document);
+      } else {
+        const documents = await this.documentUseCase.getAllDocuments();
+        res.status(200).json(documents);
       }
-      res.status(200).json(document);
     } catch (error) {
       res.status(500).json({ message: 'Error retrieving document', error });
+    }
+  }
+
+  public async getDocumentsByUserId(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.userId;
+      const documents = await this.documentUseCase.getDocumentsByUserId(userId);
+      res.status(200).json(documents);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error retrieving user documents',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   }
 
